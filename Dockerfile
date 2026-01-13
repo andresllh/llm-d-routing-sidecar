@@ -24,6 +24,11 @@ COPY internal/ internal/
 RUN CGO_ENABLED=1 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o bin/llm-d-routing-sidecar cmd/cmd.go
 
 FROM registry.access.redhat.com/ubi9/ubi:latest
+RUN dnf install -y python3-pip && \
+    dnf clean all && \
+    pip3 install --upgrade pip && \
+    # urllib3>=2.6.0 is required to fix several security issues
+    pip install "urllib3>=2.6.3" --no-cache-dir
 WORKDIR /
 COPY --from=builder /workspace/bin/llm-d-routing-sidecar /app/llm-d-routing-sidecar
 USER 65532:65532
